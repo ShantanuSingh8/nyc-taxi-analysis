@@ -1,0 +1,107 @@
+table dim_date
+	dataCategory: Time
+	lineageTag: ddb162c5-14f2-53fb-8d21-c0167f0b64ad
+
+	column date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: 3c61cf2a-42d3-5ff4-a934-900108f9196f
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: a28e4089-23a1-5869-8a52-662ed669f1e7
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_num
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: db3631d5-5638-52ae-98bc-60524fc2f749
+		summarizeBy: none
+		sourceColumn: month_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_label
+		dataType: string
+		lineageTag: 58da67ac-d406-530e-b971-afb76322bb95
+		summarizeBy: none
+		sourceColumn: month_label
+		sortByColumn: month_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday_num
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: f9911b16-2336-5774-89ff-aaa82daf78f8
+		summarizeBy: none
+		sourceColumn: weekday_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday_name
+		dataType: string
+		lineageTag: 83e18121-6724-54a4-8dd0-01f360084742
+		summarizeBy: none
+		sourceColumn: weekday_name
+		sortByColumn: weekday_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday_short
+		dataType: string
+		lineageTag: f86b0f22-91ec-5669-b779-09882e70897e
+		summarizeBy: none
+		sourceColumn: weekday_short
+		sortByColumn: weekday_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_type
+		dataType: string
+		lineageTag: fd3a0e7f-9aac-5d23-b3a7-050bef2be0ee
+		summarizeBy: none
+		sourceColumn: day_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_holiday
+		dataType: boolean
+		lineageTag: 85729834-a3ee-5835-b527-e75619488a75
+		summarizeBy: none
+		sourceColumn: is_holiday
+
+		annotation SummarizationSetBy = Automatic
+
+	column holiday_name
+		dataType: string
+		lineageTag: 9b7e9e3a-5543-50b7-b0dd-9e72897e6ce0
+		summarizeBy: none
+		sourceColumn: holiday_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "dim_date.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"date", type date}, {"year", Int64.Type}, {"month_num", Int64.Type}, {"month_label", type text}, {"weekday_num", Int64.Type}, {"weekday_name", type text}, {"weekday_short", type text}, {"day_type", type text}, {"is_holiday", type logical}, {"holiday_name", type text}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

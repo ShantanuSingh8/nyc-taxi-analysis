@@ -1,0 +1,8 @@
+trip_type,direction,trips,avg_distance_mi,avg_duration_min,avg_earnings_per_trip,earnings_per_meter_hour,avg_rider_total,avg_card_tip_pct
+City,n/a,19773152,2.6,16.3,21.57,79.3,26.05,17.7
+JFK,From airport,807798,15.3,42.3,72.78,103.35,80.59,16.6
+LGA,From airport,529494,9.6,32.9,61.31,111.75,71.0,17.6
+LGA,To airport,169943,10.0,30.5,61.42,120.77,70.72,18.5
+JFK,To airport,151669,15.9,51.2,83.99,98.48,92.48,17.4
+EWR,To airport,46689,14.8,37.1,101.15,163.39,118.25,16.1
+EWR,From airport,113,8.7,23.4,112.76,289.24,121.67,12.7

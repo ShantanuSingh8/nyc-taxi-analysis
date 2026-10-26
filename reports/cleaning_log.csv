@@ -1,0 +1,15 @@
+step,rule,action,description,rows_affected,pct_of_raw,rows_remaining
+1,pickup_outside_file_month,drop,Pickup timestamp not in the month the file covers,85,0.0,22836445
+2,dropoff_not_after_pickup,drop,Dropoff time is at or before pickup time,286181,1.253,22550264
+3,duration_over_24h,drop,Trip lasted more than 24 hours,184,0.001,22550080
+4,duration_under_1min,drop,Trip lasted under 1 minute (meter tests / cancellations),233515,1.023,22316565
+5,non_positive_distance,drop,"Trip distance is zero, negative or missing",538884,2.36,21777681
+6,distance_over_100mi,drop,Trip distance above 100 miles,908,0.004,21776773
+7,vendor_fare_not_populated,drop,"Vendor 6 (Myle): fare_amount ~$3 on ~$32 trips, so the fare field is unusable",45164,0.198,21731609
+8,non_billable_payment,drop,"No charge, dispute or voided trip (not revenue)",219393,0.961,21512216
+9,non_positive_amount,drop,"Fare or total is zero/negative, or tip is negative",30493,0.134,21481723
+10,fare_over_1000,drop,Fare above $1000,1,0.0,21481722
+11,implausible_speed,drop,Average speed above 80 mph,2864,0.013,21478858
+,flag_missing_passenger_count,flag,Passenger count null or 0 (expected for Flex Fare trips),5345686,23.408,
+,flag_unknown_zone,flag,"Pickup or dropoff zone is Unknown / Outside NYC (264, 265)",128670,0.563,
+,flag_store_and_forward,flag,Record was held in vehicle memory before upload,18567,0.081,

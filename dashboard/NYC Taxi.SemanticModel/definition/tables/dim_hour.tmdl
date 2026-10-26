@@ -1,0 +1,51 @@
+table dim_hour
+	lineageTag: c91de60f-2bcf-5a8e-b232-a977e683fec5
+
+	column hour
+		dataType: int64
+		formatString: 0
+		lineageTag: d9aacbc1-bc57-54d5-9a9a-b022143b8a9c
+		summarizeBy: none
+		sourceColumn: hour
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_label
+		dataType: string
+		lineageTag: c130501a-7d98-5334-b947-754c634893b2
+		summarizeBy: none
+		sourceColumn: hour_label
+		sortByColumn: hour
+
+		annotation SummarizationSetBy = Automatic
+
+	column time_of_day
+		dataType: string
+		lineageTag: a7b8030c-ca07-5079-b45f-37ae8a016b9f
+		summarizeBy: none
+		sourceColumn: time_of_day
+		sortByColumn: time_of_day_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column time_of_day_order
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 1c88d15e-cfbd-523a-9f59-b9a2ef1da435
+		summarizeBy: none
+		sourceColumn: time_of_day_order
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_hour = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "dim_hour.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"hour", Int64.Type}, {"hour_label", type text}, {"time_of_day", type text}, {"time_of_day_order", Int64.Type}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

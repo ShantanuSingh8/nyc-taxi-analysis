@@ -1,0 +1,12 @@
+relationship 80b1e062-d084-5b7f-85e9-e2b98232f964
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_trips.pickup_date
+	toColumn: dim_date.date
+
+relationship baef8c58-3723-56e3-93b1-dcf2cedf5a3b
+	fromColumn: fact_trips.pickup_hour
+	toColumn: dim_hour.hour
+
+relationship ac95d668-9ad8-5cee-9c85-a0aa2195d84a
+	fromColumn: fact_trips.PULocationID
+	toColumn: dim_zone.LocationID

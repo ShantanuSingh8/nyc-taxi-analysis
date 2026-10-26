@@ -1,0 +1,9 @@
+duckdb>=2.0
+pandas>=3.0
+pyarrow>=26.0
+holidays
+pyshp
+pyproj
+matplotlib
+seaborn
+jupyter

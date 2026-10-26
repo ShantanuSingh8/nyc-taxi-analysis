@@ -1,0 +1,74 @@
+table dim_zone
+	lineageTag: 8980a5af-8871-512b-98cf-702fea5053bd
+
+	column LocationID
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: b03f9455-45d7-522d-96d7-3333cfa2bbd5
+		summarizeBy: none
+		sourceColumn: LocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column borough
+		dataType: string
+		lineageTag: 6f40e698-57e2-5b05-a7f3-2e87d298149d
+		summarizeBy: none
+		sourceColumn: borough
+
+		annotation SummarizationSetBy = Automatic
+
+	column zone
+		dataType: string
+		lineageTag: a758eada-ff60-5497-a879-7261c51f65a2
+		summarizeBy: none
+		sourceColumn: zone
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_zone
+		dataType: string
+		lineageTag: a2f0706a-6f4f-5e2c-a4dc-e31db92fc0a8
+		summarizeBy: none
+		sourceColumn: service_zone
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_airport
+		dataType: boolean
+		lineageTag: 9066fdd7-6164-5d9e-850a-ca19a7bb3eba
+		summarizeBy: none
+		sourceColumn: is_airport
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		dataCategory: Latitude
+		lineageTag: b6a5e20a-2193-585a-b69c-149741cbd2f7
+		summarizeBy: none
+		sourceColumn: latitude
+
+		annotation SummarizationSetBy = Automatic
+
+	column longitude
+		dataType: double
+		dataCategory: Longitude
+		lineageTag: ff2eb85c-5369-53f4-a7a1-2ef9d497feb5
+		summarizeBy: none
+		sourceColumn: longitude
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_zone = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "dim_zone.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"LocationID", Int64.Type}, {"borough", type text}, {"zone", type text}, {"service_zone", type text}, {"is_airport", type logical}, {"latitude", type number}, {"longitude", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,306 @@
+table fact_trips
+	lineageTag: 6bbc4739-7b4b-5747-a0ff-f5533ce320d5
+
+	measure Trips = SUM ( fact_trips[trip_count] )
+		formatString: #,0
+		lineageTag: 6f5236a5-3000-5e51-8457-5f780243e9dc
+
+	measure 'Avg Trips per Day' = DIVIDE ( [Trips], DISTINCTCOUNT ( dim_date[date] ) )
+		formatString: #,0
+		lineageTag: 430081e5-8a58-5eb9-997a-f9fdbf978ea3
+
+	measure 'Trips PM' = CALCULATE ( [Trips], DATEADD ( dim_date[date], -1, MONTH ) )
+		formatString: #,0
+		lineageTag: 14aaf382-a751-5632-95f4-207337d30532
+
+	measure 'Trips MoM %' = DIVIDE ( [Trips] - [Trips PM], [Trips PM] )
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: 864f54b6-54ff-5880-a08a-1f308b4f08fe
+
+	measure 'Gross Revenue' = SUM ( fact_trips[total_amount] )
+		formatString: \$#,0
+		lineageTag: ed6eb154-0dde-525e-ab43-a7fb03f2dbed
+
+	measure 'Driver Earnings' = SUM ( fact_trips[driver_earnings] )
+		formatString: \$#,0
+		lineageTag: 3f537163-8551-5684-bd39-b80fcd823712
+
+	measure 'Meter Hours' = SUM ( fact_trips[duration_min] ) / 60
+		formatString: #,0
+		lineageTag: 9ee38821-e8fc-5190-8003-6c6cbfbadc68
+
+	measure 'Earnings per Meter-Hour' = DIVIDE ( [Driver Earnings], [Meter Hours] )
+		formatString: \$#,0.00
+		lineageTag: d2691dbc-6cfb-5279-b126-44ed8309b3be
+
+	measure 'Earnings per Trip' = DIVIDE ( [Driver Earnings], [Trips] )
+		formatString: \$#,0.00
+		lineageTag: 22d4e4ab-8425-59b7-bc71-fe32e2a9d269
+
+	measure 'Avg Fare' = DIVIDE ( SUM ( fact_trips[fare_amount] ), [Trips] )
+		formatString: \$#,0.00
+		lineageTag: 06bcb70f-fe5a-5ec8-bba9-621920ee7c15
+
+	measure 'Avg Distance (mi)' = DIVIDE ( SUM ( fact_trips[distance_mi] ), [Trips] )
+		formatString: 0.00
+		lineageTag: d8025d0c-105b-5913-b947-0e1f29bc0161
+
+	measure 'Avg Speed (mph)' = DIVIDE ( SUM ( fact_trips[distance_mi] ), [Meter Hours] )
+		formatString: 0.0
+		lineageTag: 35dbb9a2-8df5-56a7-b073-a67a83ca557e
+
+	measure 'Earnings vs City %' =
+			VAR CityRate =
+			    CALCULATE (
+			        [Earnings per Meter-Hour],
+			        REMOVEFILTERS ( fact_trips[trip_type], fact_trips[airport_direction], fact_trips[trip_segment] ),
+			        fact_trips[trip_type] = "City"
+			    )
+			RETURN
+			    DIVIDE ( [Earnings per Meter-Hour], CityRate ) - 1
+		formatString: +0%;-0%;0%
+		lineageTag: 296601c4-b63e-51ad-8e88-58d2210b32d7
+
+	measure 'Card Tip %' = DIVIDE ( SUM ( fact_trips[tip_eligible_tips] ), SUM ( fact_trips[tip_eligible_base] ) )
+		formatString: 0.0%
+		lineageTag: 28b57a54-b81e-5d5d-a125-0e0ee479f08e
+
+	measure 'Flex Fare Share' = DIVIDE ( CALCULATE ( [Trips], fact_trips[pricing] = "Flex Fare" ), [Trips] )
+		formatString: 0.0%
+		lineageTag: e3a348fa-ad86-59ba-8d12-68eba87ba4d5
+
+	measure 'Airport Trip Share' = DIVIDE ( CALCULATE ( [Trips], fact_trips[trip_type] <> "City" ), [Trips] )
+		formatString: 0.0%
+		lineageTag: 21f57291-d41f-5cbe-b833-6e318292e3c0
+
+	measure 'Is Ranked Zone' = IF ( [Trips] >= 10000 && SELECTEDVALUE ( dim_zone[service_zone] ) <> "N/A", 1, 0 )
+		formatString: 0
+		lineageTag: 36f45a09-d902-5b9a-9640-5018a403b78b
+
+	measure 'Trips (10k+ zones)' = IF ( [Is Ranked Zone] = 1, [Trips] )
+		formatString: #,0
+		lineageTag: 5297f50a-1ca1-5809-b396-2ba900515c93
+
+	measure 'Earnings per Trip (10k+ zones)' = IF ( [Is Ranked Zone] = 1, [Earnings per Trip] )
+		formatString: \$#,0.00
+		lineageTag: 050fddd0-c885-5538-bfcb-258dcd66dc8c
+
+	measure 'Earnings per Meter-Hour (10k+ zones)' = IF ( [Is Ranked Zone] = 1, [Earnings per Meter-Hour] )
+		formatString: \$#,0.00
+		lineageTag: 7411b83c-65fe-5da3-83e4-f60331b05887
+
+	measure 'Earnings per Meter-Hour (1k+ trips)' = IF ( [Trips] >= 1000, [Earnings per Meter-Hour] )
+		formatString: \$#,0.00
+		lineageTag: 8812f9ae-b6e3-50ed-b1e9-6533873d8b4e
+
+	measure 'Zone Latitude' = MIN ( dim_zone[latitude] )
+		formatString: 0.0000
+		lineageTag: 39a925a4-0f2f-59e1-a522-d29c802f19b8
+
+	measure 'Zone Longitude' = MIN ( dim_zone[longitude] )
+		formatString: 0.0000
+		lineageTag: 434e9d0b-5dae-57d0-9af8-8814aef30d94
+
+	column pickup_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isHidden
+		lineageTag: 3af19368-4304-5a6d-b338-91b6f45b390d
+		summarizeBy: none
+		sourceColumn: pickup_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column pickup_hour
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: b4cd9caa-3f9a-5b8a-bdcd-e0fae4115ba9
+		summarizeBy: none
+		sourceColumn: pickup_hour
+
+		annotation SummarizationSetBy = Automatic
+
+	column PULocationID
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 22acbb7d-0e5b-57b6-83cb-f6e16182572c
+		summarizeBy: none
+		sourceColumn: PULocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column pricing
+		dataType: string
+		lineageTag: 2f4cf7b1-5bdf-57a3-b310-1ad72a4a3e38
+		summarizeBy: none
+		sourceColumn: pricing
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_label
+		dataType: string
+		lineageTag: 1b959269-5f4a-5f27-8107-48323f689906
+		summarizeBy: none
+		sourceColumn: payment_label
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_type
+		dataType: string
+		lineageTag: ce757527-ecfd-5b51-ae39-27fcc9096b51
+		summarizeBy: none
+		sourceColumn: trip_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column airport_direction
+		dataType: string
+		lineageTag: 7cb43195-4b45-56fc-9c12-1ba007d2ee57
+		summarizeBy: none
+		sourceColumn: airport_direction
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_segment
+		dataType: string
+		lineageTag: 55fb59b6-e488-588d-90fb-54913a2d1588
+		summarizeBy: none
+		sourceColumn: trip_segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: a1f59ec8-8fa1-5a92-85dc-1119278a141a
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column distance_mi
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 64a8c6ca-75d1-538e-b4fa-3dafea771d46
+		summarizeBy: sum
+		sourceColumn: distance_mi
+
+		annotation SummarizationSetBy = Automatic
+
+	column duration_min
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 77e990f3-feaf-5069-b74d-081c3d752ff3
+		summarizeBy: sum
+		sourceColumn: duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+	column fare_amount
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 05149014-c8cc-5bb6-9167-c17505fbd004
+		summarizeBy: sum
+		sourceColumn: fare_amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column extra
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 7f1fcade-dae0-59d8-a00d-d2c1b26d7452
+		summarizeBy: sum
+		sourceColumn: extra
+
+		annotation SummarizationSetBy = Automatic
+
+	column tip_amount
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: cb227c74-46c3-5c75-b0ea-fd7b9a866df0
+		summarizeBy: sum
+		sourceColumn: tip_amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column tolls_amount
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 4b1180cb-f2a4-5434-9356-5d4422922e74
+		summarizeBy: sum
+		sourceColumn: tolls_amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_amount
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: a415b81c-d182-5934-89ae-933ec67e38af
+		summarizeBy: sum
+		sourceColumn: total_amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column driver_earnings
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: a9900d79-36d0-5e04-a2d7-2942c95035dd
+		summarizeBy: sum
+		sourceColumn: driver_earnings
+
+		annotation SummarizationSetBy = Automatic
+
+	column tip_eligible_trips
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 150d1c13-f10b-5499-bf05-344cac45f6a1
+		summarizeBy: sum
+		sourceColumn: tip_eligible_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column tip_eligible_tips
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 193cf51d-a008-50e4-9404-578779a1bd25
+		summarizeBy: sum
+		sourceColumn: tip_eligible_tips
+
+		annotation SummarizationSetBy = Automatic
+
+	column tip_eligible_base
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 4fa9a882-e875-5caa-aaa4-9b35c5590539
+		summarizeBy: sum
+		sourceColumn: tip_eligible_base
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_trips = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "fact_trips.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"pickup_date", type date}, {"pickup_hour", Int64.Type}, {"PULocationID", Int64.Type}, {"pricing", type text}, {"payment_label", type text}, {"trip_type", type text}, {"airport_direction", type text}, {"trip_segment", type text}, {"trip_count", Int64.Type}, {"distance_mi", type number}, {"duration_min", type number}, {"fare_amount", type number}, {"extra", type number}, {"tip_amount", type number}, {"tolls_amount", type number}, {"total_amount", type number}, {"driver_earnings", type number}, {"tip_eligible_trips", Int64.Type}, {"tip_eligible_tips", type number}, {"tip_eligible_base", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
